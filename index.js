@@ -68,7 +68,7 @@ app.post('/login', (req, res) =>{
         else if (await bcrypt.compare(password, found.password) === true){
             const options =  {expiresIn:  '1h'};
             const loginToken = jwt.sign({email: email}, cookieUnique, options);
-            res.cookie('loginToken', loginToken, { httpOnly: true }).status(200).send();
+            res.cookie('loginToken', loginToken, { httpOnly: false }).status(200).send();
 
         }
     });
@@ -78,4 +78,59 @@ app.post('/login', (req, res) =>{
 app.get("/verifyToken", Auth, (req, res) =>{
     res.status(200).send();
 });
+
+app.get("/getUser", Auth, (req, res) =>{
+    const loginToken = req.cookies.loginToken;
+        jwt.verify(loginToken, cookieUnique, (err, payload) =>{
+            if (err){
+                res.status(401).send("Invalid");
+            }
+            else{
+                res.send(payload.email);
+                console.log('Verified payload: ' + payload.email);
+
+            }
+        });
+    });
+
+app.get("/users", Auth, (req, res) =>{
+    User.find().select('-password').then( found  => {
+      if(found){
+            found.password = undefined;
+            res.send(found);
+        }
+    }
+
+
+)});
+
+app.get("/users/:email", Auth, (req, res) =>{
+    User.findOne({email: req.params.email}, (err, found) =>{
+        if(err){
+            res.status(500).send();
+        }else if(found){
+            found.password = undefined;
+            res.send(found);
+        }
+
+    })
+});
+app.put("/users/:email", Auth, async (req, res) =>{
+    User.findOne({email: req.params.email}, (err, found) =>{
+        if(err){
+            res.status(500).send();
+        }else if(found){
+            found = req.body;
+            User.updateOne({email: req.params.email}, found, (err) =>{
+                if (err){ res.status(500).send();}
+                else{
+                    res.status(200).send(found);
+                }
+            })
+        }
+
+    })
+
+    });
+
 

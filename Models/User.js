@@ -8,8 +8,9 @@ const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     phoneNum: { type: Number },
+    birthDate: { type: Date, default: '1997-10-30'},
     country: {type: String },
-    profileImage:{type: Buffer},
+    profileImage:{type: String},
     academy:{type: String},
     winStatistics:{type: Object},
     adminPermissions: {type: Boolean}

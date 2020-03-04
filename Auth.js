@@ -7,12 +7,13 @@ const Auth = function(req, res, next){
         res.status(401).send("No Token");
     }
     else{
-        jwt.verify(loginToken, cookieUnique, (err, decoded) =>{
+        jwt.verify(loginToken, cookieUnique, (err, payload) =>{
             if (err){
                 res.status(401).send("Invalid");
             }
             else{
-            req.email = decoded.email;
+            //res.send(payload.email);
+            console.log('Verified payload: ' + payload.email);
             next();
             }
         });
