@@ -13,7 +13,7 @@ const Auth = function(req, res, next){
             }
             else{
             //res.send(payload.email);
-            console.log('Verified payload: ' + payload.email);
+            console.log(payload.email + ' : Accessing : ' + req.method + ':' + req.url);
             next();
             }
         });

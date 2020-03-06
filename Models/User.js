@@ -10,10 +10,12 @@ const userSchema = new mongoose.Schema({
     phoneNum: { type: Number },
     birthDate: { type: Date, default: '1997-10-30'},
     country: {type: String },
-    profileImage:{type: String},
+    profileImage:{type: String, default: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkBAMAAACCzIhnAAAAG1BMVEXMzMyWlpacnJy+vr6jo6PFxcW3t7eqqqqxsbHbm8QuAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAiklEQVRYhe3QMQ6EIBAF0C+GSInF9mYTs+1ewRsQbmBlayysKefYO2asXbbYxvxHQj6ECQMAEREREf2NQ/fCtp5Zky6vtRMkSJEzhyISynWJnzH6Z8oQlzS7lEc/fLmmQUSvc16OrCPqRl1JePxQYo1ZSWVj9nxrrOb5esw+eXdvzTWfTERERHRXH4tWFZGswQ2yAAAAAElFTkSuQmCC'},
     academy:{type: String},
     winStatistics:{type: Object},
-    adminPermissions: {type: Boolean}
+    adminPermissions: {type: Boolean},
+    age: {type: Number},
+    _createdOn:{type: Date}
 });
 //Declares schema
 
@@ -26,10 +28,15 @@ if (this.isNew || this.isModified('password')){
         }
         else{
             document.password = hashedPassword;
+            if (!this._createdOn) {
+                this._createdOn = new Date();
+            }
             next();
         }
     });
 }
+
+
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -19,7 +19,7 @@ app.listen(81, () => {
     console.log("Express started on port 81");
 });
 
-mongoose.connect('mongodb://localhost/qikcomp', {useNewUrlParser: true, useUnifiedTopology: true, usecreateIndex: true});
+mongoose.connect('mongodb://localhost/qikcomp', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
 const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'Database connection error: '));
@@ -32,12 +32,15 @@ app.get("/", (req, res) =>{
 });
 
 app.post('/registerUser', (req, res) => {
-    const {email, password, firstName, lastName} = req.body;
+    const { password, firstName, lastName} = req.body;
+    const email = req.body.email.toLowerCase();
+    console.log(email);
     const user = new User({email, password, firstName, lastName});
     console.log(user.password);
     User.findOne({email: email}, async (err, found) =>{
-        if (found ==! null){
+        if (found != null){
             res.status(409).send();
+            console.log(email + ' : Email already exists')
         }
     else{
             user.save((found)=>{
@@ -56,20 +59,26 @@ app.post('/registerUser', (req, res) => {
 
 app.post('/login', (req, res) =>{
 
-    const {email, password} = req.body;
-    console.log(req.body.email);
+    const { password} = req.body;
+    const email = req.body.email.toLowerCase();
+    console.log(email + ' : Login Attempt');
     const user = new User({email, password});
 
-    User.findOne({email: req.body.email}, async (err, found) =>{
+    User.findOne({email: email}, async (err, found) =>{
         if (found == null){
             res.status(500).send();
-            console.log(found);
+            console.log(req.body.email + ': Email not found');
         }
         else if (await bcrypt.compare(password, found.password) === true){
             const options =  {expiresIn:  '1h'};
             const loginToken = jwt.sign({email: email}, cookieUnique, options);
+            console.log(found.email + ' : Login Success ');
             res.cookie('loginToken', loginToken, { httpOnly: false }).status(200).send();
 
+        }
+        else{
+            console.log(found.email + ' : Incorrect password');
+            res.status(401).send();
         }
     });
 
@@ -87,7 +96,6 @@ app.get("/getUser", Auth, (req, res) =>{
             }
             else{
                 res.send(payload.email);
-                console.log('Verified payload: ' + payload.email);
 
             }
         });
@@ -111,10 +119,29 @@ app.get("/users/:email", Auth, (req, res) =>{
         }else if(found){
             found.password = undefined;
             res.send(found);
+            console.log(req.connection.address());
         }
 
     })
 });
+
+app.get("/profile/:id", (req, res) =>{
+    User.findOne({_id: req.params.id}, (err, found) =>{
+        if(err){
+            res.status(500).send();
+        }else if(found){
+            let date = new Date();
+            let year = date.getFullYear();
+            let birthYear = found.birthDate.getFullYear();
+            let age = year - birthYear;
+            found.password = found.email = found.phoneNum = found.birthDate = undefined;
+            found.age = age;
+            res.send(found);
+        }
+
+    })
+});
+
 app.put("/users/:email", Auth, async (req, res) =>{
     User.findOne({email: req.params.email}, (err, found) =>{
         if(err){
