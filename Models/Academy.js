@@ -1,14 +1,25 @@
+const mongoose = require('mongoose');
+
 const academySchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    phoneNum: { type: Number },
-    country: {type: String },
-    profileImage:{type: Buffer},
-    academy:{type: String},
-    winStatistics:{type: Object},
-    adminPermissions: {type: Boolean}
+    name: { type: String, required: true, unique: true },
+    address: { type: String, required: true },
+    instructor: { type: String, required: true },
+    phoneNum: { type: Number, required: true },
+    country: {type: String, required: true  },
+    about: {type: String, required: true},
+    website: {type: String, default: 'N/A'},
+    profileImage: {type: String, default: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkBAMAAACCzIhnAAAAG1BMVEXMzMyWlpacnJy+vr6jo6PFxcW3t7eqqqqxsbHbm8QuAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAiklEQVRYhe3QMQ6EIBAF0C+GSInF9mYTs+1ewRsQbmBlayysKefYO2asXbbYxvxHQj6ECQMAEREREf2NQ/fCtp5Zky6vtRMkSJEzhyISynWJnzH6Z8oQlzS7lEc/fLmmQUSvc16OrCPqRl1JePxQYo1ZSWVj9nxrrOb5esw+eXdvzTWfTERERHRXH4tWFZGswQ2yAAAAAElFTkSuQmCC'},
+    affiliation: {type: String, default: 'N/A'},
+    winStatistics: {type: Object},
+    competitors: {type: Number, default: 0},
+    _createdOn:{type: Date}
+});
+
+academySchema.pre('save', function (next) {
+     if (!this._createdOn) {
+     this._createdOn = new Date();
+     }
+     next();
 });
 
 module.exports = mongoose.model('Academy', academySchema);

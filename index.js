@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 
 
 const User = require('./Models/User');
+const Academy = require('./Models/Academy');
 const Auth = require('./Auth');
 const cookieUnique = "unqiuecookie12";
 const app = express();
@@ -104,7 +105,6 @@ app.get("/getUser", Auth, (req, res) =>{
 app.get("/users", Auth, (req, res) =>{
     User.find().select('-password').then( found  => {
       if(found){
-            found.password = undefined;
             res.send(found);
         }
     }
@@ -120,23 +120,6 @@ app.get("/users/:email", Auth, (req, res) =>{
             found.password = undefined;
             res.send(found);
             console.log(req.connection.address());
-        }
-
-    })
-});
-
-app.get("/profile/:id", (req, res) =>{
-    User.findOne({_id: req.params.id}, (err, found) =>{
-        if(err){
-            res.status(500).send();
-        }else if(found){
-            let date = new Date();
-            let year = date.getFullYear();
-            let birthYear = found.birthDate.getFullYear();
-            let age = year - birthYear;
-            found.password = found.email = found.phoneNum = found.birthDate = undefined;
-            found.age = age;
-            res.send(found);
         }
 
     })
@@ -160,4 +143,57 @@ app.put("/users/:email", Auth, async (req, res) =>{
 
     });
 
+app.get("/profile/:id", (req, res) =>{
+    User.findOne({_id: req.params.id}, (err, found) =>{
+        if(err){
+            res.status(500).send();
+        }else if(found){
+            let date = new Date();
+            let year = date.getFullYear();
+            let birthYear = found.birthDate.getFullYear();
+            let age = year - birthYear;
+            found.password = found.email = found.phoneNum = found.birthDate = undefined;
+            found.age = age;
+            res.send(found);
+        }
 
+    })
+});
+
+app.post('/createAcademy', Auth, (req, res) => {
+    const {address, country, phoneNum, instructor, affiliation, about, profileImage, website} = req.body;
+    const name = req.body.name.toUpperCase();
+    const academy = new Academy({name, address, country, phoneNum, instructor, affiliation, about, profileImage, website});
+    console.log(academy);
+    console.log(name + ' : Attempting to create');
+    Academy.findOne({name: name}, async (err, found) =>{
+        if (found != null){
+            res.status(409).send();
+            console.log(name + ' : Academy already exists')
+        }
+        else{
+            academy.save((err) =>{
+                if (err){
+                    res.status(500).send();
+                    console.log(name + ' : Error Registering!');
+                    return console.error(err);
+                } else {
+                    res.status(200).send(name + ' : Academy Registered!');
+                    console.log(name + ' : Academy Registered!');
+                }
+            })
+        }
+    });
+
+    app.get("/academies", (req, res) =>{
+        Academy.find().then(found  => {
+                if(found){
+                    res.send(found);
+                }
+            }
+
+
+        )});
+
+
+});
