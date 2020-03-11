@@ -163,17 +163,35 @@ app.get("/profile/:id", (req, res) =>{
 app.post('/createAcademy', Auth, (req, res) => {
     const {address, country, phoneNum, instructor, affiliation, about, profileImage, website} = req.body;
     const name = req.body.name.toUpperCase();
-    const academy = new Academy({name, address, country, phoneNum, instructor, affiliation, about, profileImage, website});
+    const manager = jwt.decode(req.cookies.loginToken).email.toLowerCase();
+    const competitors = [];
+    const academy = new Academy({
+        name,
+        address,
+        country,
+        phoneNum,
+        instructor,
+        affiliation,
+        about,
+        profileImage,
+        website,
+        competitors,
+        manager
+    });
     console.log(academy);
     console.log(name + ' : Attempting to create');
-    Academy.findOne({name: name}, async (err, found) =>{
-        if (found != null){
+    Academy.findOne({name: name}, async (err, found) => {
+        if (found != null) {
             res.status(409).send();
             console.log(name + ' : Academy already exists')
-        }
-        else{
-            academy.save((err) =>{
-                if (err){
+        } else {
+            Academy.findOne({manager: manager}, async (err, found2) => {
+                if (found2 != null){
+                    res.status(409).send();
+                    console.log(name + ' : Manager already in use')
+                } else{
+            academy.save((err) => {
+                if (err) {
                     res.status(500).send();
                     console.log(name + ' : Error Registering!');
                     return console.error(err);
@@ -182,8 +200,10 @@ app.post('/createAcademy', Auth, (req, res) => {
                     console.log(name + ' : Academy Registered!');
                 }
             })
+                }})
         }
     });
+});
 
     app.get("/academies", (req, res) =>{
         Academy.find().then(found  => {
@@ -195,5 +215,13 @@ app.post('/createAcademy', Auth, (req, res) => {
 
         )});
 
+app.get("/academy/:id", (req, res) =>{
+    Academy.findOne({_id: req.params.id}, (err, found) =>{
+        if(err){
+            res.status(500).send();
+        }else if(found){
+            res.send(found);
+        }
 
+    })
 });
