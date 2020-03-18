@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 
 const User = require('./Models/User');
 const Academy = require('./Models/Academy');
+const Affiliation = require('./Models/Affilliation');
 const Auth = require('./Auth');
 const cookieUnique = "unqiuecookie12";
 const app = express();
@@ -190,12 +191,13 @@ app.post('/createAcademy', Auth, (req, res) => {
                     res.status(409).send();
                     console.log(name + ' : Manager already in use')
                 } else{
-            academy.save((err) => {
+            academy.save(async (err, saved) => {
                 if (err) {
                     res.status(500).send();
                     console.log(name + ' : Error Registering!');
                     return console.error(err);
                 } else {
+                    await User.updateOne({email: manager}, {manages: saved._id, academy: saved._id});
                     res.status(200).send(name + ' : Academy Registered!');
                     console.log(name + ' : Academy Registered!');
                 }
@@ -217,6 +219,87 @@ app.post('/createAcademy', Auth, (req, res) => {
 
 app.get("/academy/:id", (req, res) =>{
     Academy.findOne({_id: req.params.id}, (err, found) =>{
+        if(err){
+            res.status(500).send();
+        }else if(found){
+            res.send(found);
+        }
+
+    })
+});
+
+app.put("/academy/:id", Auth, (req, res) =>{
+    const manager = jwt.decode(req.cookies.loginToken).email.toLowerCase();
+    Academy.findOne({_id: req.params.id}, (err, found) =>{
+        if(err){
+            res.status(500).send();
+            console.log(found.name + ' : Academy NAME already in use!!');
+        }else if(found.manager === manager){
+            found = req.body;
+            Academy.updateOne({_id: req.params.id}, found, (err) =>{
+                if (err){ res.status(500).send();}
+                else{
+                    res.status(200).send();
+                    console.log(found.name + ' : Academy Updated!');
+                }
+            })
+        }else{res.status(409).send()
+            console.log(found.name + ' : Manager Not Authorised!');}
+
+    })
+});
+
+
+
+app.post('/createAffiliation', Auth, (req, res) => {
+    const {academies, about, profileImage} = req.body;
+    const name = req.body.name.toUpperCase();
+    const manager = jwt.decode(req.cookies.loginToken).email.toLowerCase();
+    const affiliation = new Affiliation({
+        name,
+        about,
+        academies,
+        profileImage,
+        manager
+    });
+    console.log(affiliation);
+    console.log(name + ' : Attempting to create');
+    Affiliation.findOne({name: name}, async (err, found) => {
+        if (found != null) {
+            res.status(409).send();
+            console.log(name + ' : Affiliation already exists')
+        } else {
+            Affiliation.findOne({manager: manager}, async (err, found2) => {
+                if (found2 != null){
+                    res.status(409).send();
+                    console.log(name + ' : Manager already in use')
+                } else{
+                    affiliation.save((err) => {
+                        if (err) {
+                            res.status(500).send();
+                            console.log(name + ' : Error Registering!');
+                            return console.error(err);
+                        } else {
+                            res.status(200).send(name + ' : Academy Registered!');
+                            console.log(name + ' : Academy Registered!');
+                        }
+                    })
+                }})
+        }
+    });
+});
+app.get("/affiliations", (req, res) =>{
+    Affiliation.find().then(found  => {
+            if(found){
+                res.send(found);
+            }
+        }
+
+
+    )});
+
+app.get("/affiliation/:id", (req, res) =>{
+    Affiliation.findOne({_id: req.params.id}, (err, found) =>{
         if(err){
             res.status(500).send();
         }else if(found){
