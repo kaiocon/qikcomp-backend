@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
     winStatistics:{type: Object},
     adminPermissions: {type: Boolean, default: false},
     manages: {type: String, unique: true},
+    managesAffiliation: {type: String, unique: true},
     age: {type: Number},
     _createdOn:{type: Date}
 });

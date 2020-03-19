@@ -197,7 +197,10 @@ app.post('/createAcademy', Auth, (req, res) => {
                     console.log(name + ' : Error Registering!');
                     return console.error(err);
                 } else {
-                    await User.updateOne({email: manager}, {manages: saved._id, academy: saved._id});
+                    let user;
+                    user = await User.findOneAndUpdate({email: manager}, {manages: saved._id, academy: saved._id});
+                    academy.competitors.push(user._id);
+                    academy.save();
                     res.status(200).send(name + ' : Academy Registered!');
                     console.log(name + ' : Academy Registered!');
                 }
@@ -274,14 +277,15 @@ app.post('/createAffiliation', Auth, (req, res) => {
                     res.status(409).send();
                     console.log(name + ' : Manager already in use')
                 } else{
-                    affiliation.save((err) => {
+                    affiliation.save(async (err, saved) => {
                         if (err) {
                             res.status(500).send();
                             console.log(name + ' : Error Registering!');
                             return console.error(err);
                         } else {
-                            res.status(200).send(name + ' : Academy Registered!');
-                            console.log(name + ' : Academy Registered!');
+                            await User.updateOne({email: manager}, {managesAffiliation: saved._id});
+                            res.status(200).send(name + ' : Affiliation Registered!');
+                            console.log(name + ' : Affiliation Registered!');
                         }
                     })
                 }})
@@ -305,6 +309,26 @@ app.get("/affiliation/:id", (req, res) =>{
         }else if(found){
             res.send(found);
         }
+
+    })
+});
+app.put("/affiliation/:id", Auth, (req, res) =>{
+    const manager = jwt.decode(req.cookies.loginToken).email.toLowerCase();
+    Affiliation.findOne({_id: req.params.id}, (err, found) =>{
+        if(err){
+            res.status(500).send();
+            console.log(found.name + ' : Affiliation NAME already in use!!');
+        }else if(found.manager === manager){
+            found = req.body;
+            Affiliation.updateOne({_id: req.params.id}, found, (err) =>{
+                if (err){ res.status(500).send();}
+                else{
+                    res.status(200).send();
+                    console.log(found.name + ' : Affiliation  Updated!');
+                }
+            })
+        }else{res.status(409).send()
+            console.log(found.name + ' : Manager Not Authorised!');}
 
     })
 });
