@@ -10,7 +10,7 @@ const User = require('./Models/User');
 const Academy = require('./Models/Academy');
 const Event = require('./Models/Event');
 const Bracket = require('./Models/Bracket');
-const match = require('./Models/Match');
+const Match = require('./Models/Match');
 const Affiliation = require('./Models/Affilliation');
 const Auth = require('./Auth');
 const cookieUnique = "unqiuecookie12";
@@ -344,6 +344,33 @@ app.get("/events", (req, res) =>{
         }
     )});
 
+app.get("/event/:id", (req, res) =>{
+    Event.findOne({_id: req.params.id}).then(found  => {
+            if(found){
+                res.send(found);
+            }
+        }
+    )});
+
+app.put("/event/:id", (req, res) =>{
+    Event.findOne({_id: req.params.id}).then(found  => {
+            if(found){
+                found = req.body;
+                Event.updateOne({_id: req.params.id}, found, (err) =>{
+                    if (err){
+                        res.status(500).send('Error Updating Event!');
+                        return console.error(err);
+                    } else {
+                        res.status(200).send('Event Updated!')
+                    }
+                })
+
+            } else{
+                res.status(500).send();
+            }
+        }
+    )});
+
 app.post('/createEvent', Auth, (req, res) => {
     const { address, info, bannerImage, eventStart } = req.body;
     const email = jwt.decode(req.cookies.loginToken).email.toLowerCase();
@@ -374,7 +401,7 @@ app.post('/createEvent', Auth, (req, res) => {
 });
 
 app.get("/:event/brackets", (req, res) =>{
-    Event.find({eventID: req.params.event}).then(found  => {
+    Bracket.find({event: req.params.event}).then(found  => {
             if(found){
                 res.send(found);
             }
@@ -382,30 +409,123 @@ app.get("/:event/brackets", (req, res) =>{
     )});
 
 app.post('/createBracket', Auth, (req, res) => {
-    const  event = req.body.event;
+    const event = req.body.event;
     const user = jwt.decode(req.cookies.loginToken).email.toLowerCase();
     const bracketName = req.body.bracketName.toLowerCase();
-    const eventUser = Event.find({_id: event}).email;
-    const bracket = new Bracket({event, bracketName});
-    console.log(bracket);
-    Bracket.findOne({bracketName: bracketName, event: event}, async (err, found) =>{
-        if (found.event != event || user !== eventUser){
-            res.status(409).send();
-            console.log(bracketName + ' : Bracket already exists')
-        }
-        else{
-            bracket.save((err)=>{
-                if (err){
-                    res.status(500).send('Error creating Bracket: ' + bracketName);
-                    return console.error(err);
-                } else {
-                    res.status(200).send('Bracket Registered!')
-                    console.log(bracketName +' : Event Registered')
-                }
-            })
-        }
-    });
+    let eventUser;
 
+    Event.findOne({_id: event}, async (err, eventFound) => {
+            if (user !== eventFound.email){
+                res.status(500).send();
+                console.log(user + ' : Incorrect : ' + eventFound.email)
+            }else{
+            console.log('User Authorized')
+            const bracket = new Bracket({event, bracketName});
+            Bracket.findOne({bracketName: bracketName}, async (err, found) => {
+                    console.log(found);
+                    if (found != null) {
+                        res.status(409).send();
+                        console.log(bracketName + ' : Bracket already exists')
+                    }
+                    else{
+                        bracket.save((err) => {
+                            if (err) {
+                                res.status(500).send('Error creating Bracket: ' + bracketName);
+                                return console.error(err);
+                            }
+                            else {
+                                res.status(200).send('Bracket Registered!')
+                                console.log(bracketName + ' : Event Registered')
+                            }
+                        })
+                    }
+                });
+        }});});
 
+app.put("/bracket/:id", Auth, (req, res) =>{
+
+    const eventManager = jwt.decode(req.cookies.loginToken).email.toLowerCase();
+    Event.findOne({email: eventManager}, (err, event)=>{
+        Bracket.findOne({_id: req.params.id}, (err, found) =>{
+            if(err){
+                res.status(500).send();
+                console.log(found.name + ' : Bracket update error!');
+            }
+            else if(event === null){
+                res.status(409).send();
+                console.log(found.bracketName + ' : ' +  eventManager + ' : Not authorized!');
+            }else if(event.email === eventManager){
+                found = req.body;
+                Bracket.updateOne({_id: req.params.id}, found, (err) =>{
+                    if (err){ res.status(500).send();}
+                    else{
+                        res.status(200).send();
+                        console.log(found.bracketName + ' : Bracket  Updated!');
+                    }
+                })
+            }else{res.status(409).send()
+                console.log(eventManager + ' : Manager Not Authorised!');}
+
+        })
+    })
 
 });
+
+app.get("/match/:id", (req, res) =>{
+    Match.findOne({_id: req.params.id}).then(found  => {
+            if(found){
+                res.send(found);
+            }
+        }
+    )});
+
+app.get("/matchesInBracket/:bracketID", (req, res) =>{
+    Match.find({bracketID: req.params.bracketID}).then(found  => {
+            if(found){
+                res.send(found);
+            }
+        }
+    )});
+
+app.post('/createMatch', Auth, (req, res) => {
+    const {competitorOne, competitorTwo, matchLocation, bracketID} = req.body;
+    const user = jwt.decode(req.cookies.loginToken).email.toLowerCase();
+    const match = new Match({competitorOne, competitorTwo, matchLocation, bracketID});
+    Bracket.findOne({_id:bracketID}, (err, bracket) =>{
+        Event.findOne({_id: bracket.event}, (err, bracketEvent) =>{
+            if (bracketEvent.email === user){
+                match.save((err) => {
+                    if (err) {
+                        res.status(500).send('Error creating match: ' + bracketID);
+                        return console.error(err);
+                    }
+                    else {
+                        res.status(200).send('Match Registered!')
+                        console.log(bracketID + ' : Match Registered')}
+                })
+            }else{
+             console.log(user + ' : Not Authorized!');
+             res.status(401).send();
+            }
+        })
+    })
+
+        });
+app.put("/match/:id", (req, res) =>{
+    Match.findOne({_id: req.params.id}).then(found  => {
+            if(found){
+                found = req.body;
+                Match.updateOne({_id: req.params.id}, found, (err) =>{
+                    if (err){
+                        res.status(500).send('Error Updating Match!');
+                        return console.error(err);
+                    } else {
+                        res.status(200).send('Match Updated!')
+                    }
+                })
+
+            } else{
+                res.status(500).send();
+            }
+        }
+    )});

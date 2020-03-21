@@ -5,7 +5,7 @@ const bracketSchema = new mongoose.Schema({
     competitors: { type: Array},
     matches: { type: Object},
     results: {type: Object},
-    event: {type: String, default: 'N/A'}
+    event: {type: String, required: true}
 });
 
 module.exports = mongoose.model('Bracket', bracketSchema);

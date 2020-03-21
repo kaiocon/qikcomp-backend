@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4df82cbb-460f-4ddf-a00d-285cfde859d0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Models/Bracket.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Models/Match.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/Bracket.js" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Bracket.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Models/Event.js" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Event.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/Match.js" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Match.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -125,6 +125,7 @@
       <workItem from="1584568791393" duration="7184000" />
       <workItem from="1584628145807" duration="2512000" />
       <workItem from="1584713171039" duration="8601000" />
+      <workItem from="1584786180841" duration="15962000" />
     </task>
     <servers />
   </component>

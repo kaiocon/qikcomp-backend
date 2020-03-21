@@ -6,7 +6,7 @@ const eventSchema = new mongoose.Schema({
     info: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     eventStart: { type: Date, required: true },
-    competitorBrackets: {type: Object },
+    competitorBrackets: {type: Array },
     bannerImage:{type: String, required: true},
     WinResults:{type: Object}
 });
