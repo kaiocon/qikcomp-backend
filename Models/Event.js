@@ -1,14 +1,14 @@
+const mongoose = require('mongoose');
+
 const eventSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true },
+    address: { type: String, required: true },
+    info: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    phoneNum: { type: Number },
-    country: {type: String },
-    profileImage:{type: Buffer},
-    academy:{type: String},
-    winStatistics:{type: Object},
-    adminPermissions: {type: Boolean}
+    eventStart: { type: Date, required: true },
+    competitorBrackets: {type: Object },
+    bannerImage:{type: String, required: true},
+    WinResults:{type: Object}
 });
 
 module.exports = mongoose.model('Event', eventSchema);

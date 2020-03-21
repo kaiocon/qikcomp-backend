@@ -8,6 +8,9 @@ const bcrypt = require('bcryptjs');
 
 const User = require('./Models/User');
 const Academy = require('./Models/Academy');
+const Event = require('./Models/Event');
+const Bracket = require('./Models/Bracket');
+const match = require('./Models/Match');
 const Affiliation = require('./Models/Affilliation');
 const Auth = require('./Auth');
 const cookieUnique = "unqiuecookie12";
@@ -331,4 +334,78 @@ app.put("/affiliation/:id", Auth, (req, res) =>{
             console.log(found.name + ' : Manager Not Authorised!');}
 
     })
+});
+
+app.get("/events", (req, res) =>{
+    Event.find().then(found  => {
+            if(found){
+                res.send(found);
+            }
+        }
+    )});
+
+app.post('/createEvent', Auth, (req, res) => {
+    const { address, info, bannerImage, eventStart } = req.body;
+    const email = jwt.decode(req.cookies.loginToken).email.toLowerCase();
+    const name = req.body.name.toLowerCase();
+
+    const event = new Event({name, email, address, info, bannerImage, eventStart});
+    console.log(event);
+
+    Event.findOne({name: name}, async (err, found) =>{
+        if (found != null){
+            res.status(409).send();
+            console.log(name + ' : Event already exists')
+        }
+        else{
+            event.save((err)=>{
+                if (err){
+                    res.status(500).send('Error Registering!');
+                    return console.error(err);
+                } else {
+                        res.status(200).send('Event Registered!')
+                        console.log(name +' : Event Registered')
+                }
+            })
+        }
+    });
+
+
+});
+
+app.get("/:event/brackets", (req, res) =>{
+    Event.find({eventID: req.params.event}).then(found  => {
+            if(found){
+                res.send(found);
+            }
+        }
+    )});
+
+app.post('/createBracket', Auth, (req, res) => {
+    const  event = req.body.event;
+    const user = jwt.decode(req.cookies.loginToken).email.toLowerCase();
+    const bracketName = req.body.bracketName.toLowerCase();
+    const eventUser = Event.find({_id: event}).email;
+    const bracket = new Bracket({event, bracketName});
+    console.log(bracket);
+    Bracket.findOne({bracketName: bracketName, event: event}, async (err, found) =>{
+        if (found.event != event || user !== eventUser){
+            res.status(409).send();
+            console.log(bracketName + ' : Bracket already exists')
+        }
+        else{
+            bracket.save((err)=>{
+                if (err){
+                    res.status(500).send('Error creating Bracket: ' + bracketName);
+                    return console.error(err);
+                } else {
+                    res.status(200).send('Bracket Registered!')
+                    console.log(bracketName +' : Event Registered')
+                }
+            })
+        }
+    });
+
+
+
 });
