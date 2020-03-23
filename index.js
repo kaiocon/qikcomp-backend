@@ -337,7 +337,7 @@ app.put("/affiliation/:id", Auth, (req, res) =>{
 });
 
 app.get("/events", (req, res) =>{
-    Event.find().then(found  => {
+    Event.find().sort({ eventStart: 1 }).then(found  => {
             if(found){
                 res.send(found);
             }
