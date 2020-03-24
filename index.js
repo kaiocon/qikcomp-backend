@@ -163,6 +163,26 @@ app.get("/profile/:id", (req, res) =>{
 
     })
 });
+app.get("/profiles", (req, res) =>{
+    User.find((err, found) =>{
+        if(err){
+            res.status(500).send();
+        }else if(found){
+            let date = new Date();
+            let year = date.getFullYear();
+
+            for (let i = 0; i < found.length; i++) {
+                let birthYear = found[i].birthDate.getFullYear();
+                let age = year - birthYear;
+                found[i].password = found[i].email = found[i].phoneNum = found[i].birthDate = undefined;
+                found[i].age = age;
+            }
+
+            res.send(found);
+        }
+
+    })
+});
 
 app.post('/createAcademy', Auth, (req, res) => {
     const {address, country, phoneNum, instructor, affiliation, about, profileImage, website} = req.body;
