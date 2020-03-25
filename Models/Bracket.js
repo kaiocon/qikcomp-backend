@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const bracketSchema = new mongoose.Schema({
-    bracketName: { type: String, required: true, unique: true },
+    bracketName: { type: String, required: true },
     competitors: { type: Array},
     matches: { type: Object},
     results: {type: Object},

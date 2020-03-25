@@ -405,11 +405,13 @@ app.post('/createEvent', Auth, (req, res) => {
             console.log(name + ' : Event already exists')
         }
         else{
-            event.save((err)=>{
+            event.save(async (err, saved)=>{
                 if (err){
                     res.status(500).send('Error Registering!');
                     return console.error(err);
                 } else {
+                        console.log(email, saved._id);
+                        await User.updateOne({email: email}, {eventManage: saved._id});
                         res.status(200).send('Event Registered!')
                         console.log(name +' : Event Registered')
                 }
@@ -432,12 +434,11 @@ app.post('/createBracket', Auth, (req, res) => {
     const event = req.body.event;
     const user = jwt.decode(req.cookies.loginToken).email.toLowerCase();
     const bracketName = req.body.bracketName.toLowerCase();
-    let eventUser;
 
     Event.findOne({_id: event}, async (err, eventFound) => {
-            if (user !== eventFound.email){
+            if (eventFound.email != user){
                 res.status(500).send();
-                console.log(user + ' : Incorrect : ' + eventFound.email)
+                console.log(user + ' : Incorrect : ')
             }else{
             console.log('User Authorized')
             const bracket = new Bracket({event, bracketName});
