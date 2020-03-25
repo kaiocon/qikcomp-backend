@@ -130,14 +130,26 @@ app.get("/users/:email", Auth, (req, res) =>{
 });
 
 app.put("/users/:email", Auth, async (req, res) =>{
-    User.findOne({email: req.params.email}, (err, found) =>{
+    User.findOne({email: req.params.email}, async (err, found) =>{
         if(err){
             res.status(500).send();
         }else if(found){
+            const id = found.id;
+            console.log(id);
+            if(found.academy){
+                await Academy.updateOne({_id: found.academy }, { "$pull": { competitors: id }}, (err, success) =>{
+                    if(err){console.log(err)}
+                    else{console.log(success)}
+                });
+            }
             found = req.body;
             User.updateOne({email: req.params.email}, found, (err) =>{
                 if (err){ res.status(500).send();}
                 else{
+                    Academy.updateOne({_id: found.academy }, { "$push": { competitors: id }}, (err, success) =>{
+                        if(err){console.log(err)}
+                        else{console.log(success)}
+                    });
                     res.status(200).send(found);
                 }
             })
