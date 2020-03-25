@@ -135,7 +135,6 @@ app.put("/users/:email", Auth, async (req, res) =>{
             res.status(500).send();
         }else if(found){
             const id = found.id;
-            console.log(id);
             if(found.academy){
                 await Academy.updateOne({_id: found.academy }, { "$pull": { competitors: id }}, (err, success) =>{
                     if(err){console.log(err)}
@@ -273,12 +272,22 @@ app.put("/academy/:id", Auth, (req, res) =>{
             res.status(500).send();
             console.log(found.name + ' : Academy NAME already in use!!');
         }else if(found.manager === manager){
+            const id = found.affiliation;
+            console.log(id);
             found = req.body;
+            Affiliation.updateOne({_id: id }, { "$pull": { academies: req.params.id }}, (err, success) =>{
+                if(err){console.log(err)}
+                else{console.log(success)}
+            });
             Academy.updateOne({_id: req.params.id}, found, (err) =>{
                 if (err){ res.status(500).send();}
                 else{
                     res.status(200).send();
                     console.log(found.name + ' : Academy Updated!');
+                    Affiliation.updateOne({_id: found.affiliation}, { "$push": { academies: req.params.id }}, (err, success) =>{
+                        if(err){console.log(err)}
+                        else{console.log(success)}
+                    });
                 }
             })
         }else{res.status(409).send()
