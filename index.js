@@ -530,29 +530,48 @@ app.get("/matchesInBracket/:bracketID", (req, res) =>{
     )});
 
 app.post('/createMatch', Auth, (req, res) => {
-    const {competitorOne, competitorTwo, matchLocation, bracketID} = req.body;
-    const user = jwt.decode(req.cookies.loginToken).email.toLowerCase();
-    const match = new Match({competitorOne, competitorTwo, matchLocation, bracketID});
-    Bracket.findOne({_id:bracketID}, (err, bracket) =>{
-        Event.findOne({_id: bracket.event}, (err, bracketEvent) =>{
-            if (bracketEvent.email === user){
-                match.save((err) => {
-                    if (err) {
-                        res.status(500).send('Error creating match: ' + bracketID);
-                        return console.error(err);
-                    }
-                    else {
-                        res.status(200).send('Match Registered!')
-                        console.log(bracketID + ' : Match Registered')}
-                })
-            }else{
-             console.log(user + ' : Not Authorized!');
-             res.status(401).send();
-            }
-        })
-    })
+     let competitorOne;
+    const bracketID = req.body.bracketID;
+    const email = req.body.registrant;
+    User.findOne({email: email}).then((found, err) =>{
+         if (found){
+             competitorOne = found._id;
+             console.log(competitorOne)
+             Match.findOne({competitorTwo: 'OPENSPACE', bracketID: bracketID}).then((found2) =>{
+                 if(found2 != null && found2.competitorOne != competitorOne){
 
-        });
+                     found2.competitorTwo = competitorOne;
+                     found2.save((err) =>{
+                         if(err){
+                             console.log(err);
+                             res.status(500).send();
+                         }
+                         else{res.status(200).send();}
+                     })
+                 } else{
+                     Match.findOne({competitorOne: competitorOne, bracketID: bracketID}).then((found3) =>{
+                         if(found3 === null){
+                     const match = new Match({competitorOne, bracketID});
+                     match.save((err) => {
+                         if (err) {
+                             res.status(500).send('Error creating match: ' + bracketID);
+                             return console.error(err);
+                         }
+                         else {
+                             res.status(200).send('Match Registered!')
+                             console.log(bracketID + ' : Match Registered')}
+                     })
+                         }
+                         else{res.status(500).send()}
+                 })}
+             })
+         }else{console.log('end')}
+     }) ;
+
+
+
+
+});
 app.put("/match/:id", (req, res) =>{
     Match.findOne({_id: req.params.id}).then(found  => {
             if(found){
