@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
+const path = require("path");
 
 
 const User = require('./Models/User');
@@ -19,8 +20,10 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "client", "build")));
 
-app.listen(81, () => {
+
+app.listen(80, () => {
     console.log("Express started on port 81");
 });
 
@@ -599,3 +602,7 @@ app.put("/match/:id", (req, res) =>{
             }
         }
     )});
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+});
