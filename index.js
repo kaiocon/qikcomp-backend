@@ -535,7 +535,7 @@ app.post('/createMatch', Auth, (req, res) => {
     const email = req.body.registrant;
     User.findOne({email: email}).then((found, err) =>{
          if (found){
-             competitorOne = found._id;
+             competitorOne = found.id;
              console.log(competitorOne)
              Match.findOne({competitorTwo: 'OPENSPACE', bracketID: bracketID}).then((found2) =>{
                  if(found2 != null && found2.competitorOne != competitorOne){
@@ -546,7 +546,12 @@ app.post('/createMatch', Auth, (req, res) => {
                              console.log(err);
                              res.status(500).send();
                          }
-                         else{res.status(200).send();}
+                         else{res.status(200).send();
+                             Bracket.updateOne({_id: bracketID }, { "$push": { competitors: competitorOne}}, (err, success) =>{
+                                 if(err){console.log(err)}
+                                 else{console.log(success)}
+                             });
+                         }
                      })
                  } else{
                      Match.findOne({competitorOne: competitorOne, bracketID: bracketID}).then((found3) =>{
@@ -560,6 +565,10 @@ app.post('/createMatch', Auth, (req, res) => {
                          else {
                              res.status(200).send('Match Registered!')
                              console.log(bracketID + ' : Match Registered')}
+                             Bracket.updateOne({_id: bracketID}, { "$push": { competitors: competitorOne}}, (err, success) =>{
+                             if(err){console.log(err)}
+                             else{console.log(success)}
+                         });
                      })
                          }
                          else{res.status(500).send()}
