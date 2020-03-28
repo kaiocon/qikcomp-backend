@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, "client", "build")));
 
 
 app.listen(80, () => {
-    console.log("Express started on port 81");
+    console.log("Express started on port 80");
 });
 
 mongoose.connect('mongodb://localhost/qikcomp', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true});
@@ -33,10 +33,6 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Database connection error: '));
 db.once('open', () =>{
     console.log('Database Connected!');
-});
-
-app.get("/", (req, res) =>{
-    res.send("QikComp API V0.1");
 });
 
 app.post('/registerUser', (req, res) => {
