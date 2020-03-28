@@ -161,7 +161,7 @@ app.put("/users/:email", Auth, async (req, res) =>{
 
     });
 
-app.get("/profile/:id", (req, res) =>{
+app.get("/profileGet/:id", (req, res) =>{
     User.findOne({_id: req.params.id}, (err, found) =>{
         if(err){
             res.status(500).send();
@@ -177,7 +177,7 @@ app.get("/profile/:id", (req, res) =>{
 
     })
 });
-app.get("/profiles", (req, res) =>{
+app.get("/profilesGet", (req, res) =>{
     User.find((err, found) =>{
         if(err){
             res.status(500).send();
@@ -247,7 +247,7 @@ app.post('/createAcademy', Auth, (req, res) => {
     });
 });
 
-    app.get("/academies", (req, res) =>{
+    app.get("/academiesGet", (req, res) =>{
         Academy.find().then(found  => {
                 if(found){
                     res.send(found);
@@ -257,7 +257,7 @@ app.post('/createAcademy', Auth, (req, res) => {
 
         )});
 
-app.get("/academy/:id", (req, res) =>{
+app.get("/academyGet/:id", (req, res) =>{
     Academy.findOne({_id: req.params.id}, (err, found) =>{
         if(err){
             res.status(500).send();
@@ -339,7 +339,7 @@ app.post('/createAffiliation', Auth, (req, res) => {
         }
     });
 });
-app.get("/affiliations", (req, res) =>{
+app.get("/affiliationsGet", (req, res) =>{
     Affiliation.find().then(found  => {
             if(found){
                 res.send(found);
@@ -349,7 +349,7 @@ app.get("/affiliations", (req, res) =>{
 
     )});
 
-app.get("/affiliation/:id", (req, res) =>{
+app.get("/affiliationGet/:id", (req, res) =>{
     Affiliation.findOne({_id: req.params.id}, (err, found) =>{
         if(err){
             res.status(500).send();
@@ -380,7 +380,7 @@ app.put("/affiliation/:id", Auth, (req, res) =>{
     })
 });
 
-app.get("/events", (req, res) =>{
+app.get("/eventsGet", (req, res) =>{
     Event.find().sort({ eventStart: 1 }).then(found  => {
             if(found){
                 res.send(found);
@@ -388,7 +388,7 @@ app.get("/events", (req, res) =>{
         }
     )});
 
-app.get("/event/:id", (req, res) =>{
+app.get("/eventGet/:id", (req, res) =>{
     Event.findOne({_id: req.params.id}).then(found  => {
             if(found){
                 res.send(found);
