@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
+const path = require("path");
 
 
 const User = require('./Models/User');
@@ -19,8 +20,10 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "client", "build")));
 
-app.listen(81, () => {
+
+app.listen(80, () => {
     console.log("Express started on port 81");
 });
 
@@ -47,7 +50,7 @@ app.post('/registerUser', (req, res) => {
             res.status(409).send();
             console.log(email + ' : Email already exists')
         }
-    else{
+        else{
             user.save((found)=>{
                 if (err){
                     res.status(500).send('Error Registering!');
@@ -95,26 +98,26 @@ app.get("/verifyToken", Auth, (req, res) =>{
 
 app.get("/getUser", Auth, (req, res) =>{
     const loginToken = req.cookies.loginToken;
-        jwt.verify(loginToken, cookieUnique, (err, payload) =>{
-            if (err){
-                res.status(401).send("Invalid");
-            }
-            else{
-                res.send(payload.email);
+    jwt.verify(loginToken, cookieUnique, (err, payload) =>{
+        if (err){
+            res.status(401).send("Invalid");
+        }
+        else{
+            res.send(payload.email);
 
-            }
-        });
+        }
     });
+});
 
 app.get("/users", Auth, (req, res) =>{
     User.find().select('-password').then( found  => {
-      if(found){
-            res.send(found);
+            if(found){
+                res.send(found);
+            }
         }
-    }
 
 
-)});
+    )});
 
 app.get("/users/:email", Auth, (req, res) =>{
     User.findOne({email: req.params.email}, (err, found) =>{
@@ -156,9 +159,9 @@ app.put("/users/:email", Auth, async (req, res) =>{
 
     })
 
-    });
+});
 
-app.get("/profileGet/:id", (req, res) =>{
+app.get("/profile/:id", (req, res) =>{
     User.findOne({_id: req.params.id}, (err, found) =>{
         if(err){
             res.status(500).send();
@@ -174,7 +177,7 @@ app.get("/profileGet/:id", (req, res) =>{
 
     })
 });
-app.get("/profilesGet", (req, res) =>{
+app.get("/profiles", (req, res) =>{
     User.find((err, found) =>{
         if(err){
             res.status(500).send();
@@ -225,36 +228,36 @@ app.post('/createAcademy', Auth, (req, res) => {
                     res.status(409).send();
                     console.log(name + ' : Manager already in use')
                 } else{
-            academy.save(async (err, saved) => {
-                if (err) {
-                    res.status(500).send();
-                    console.log(name + ' : Error Registering!');
-                    return console.error(err);
-                } else {
-                    let user;
-                    user = await User.findOneAndUpdate({email: manager}, {manages: saved._id, academy: saved._id});
-                    academy.competitors.push(user._id);
-                    academy.save();
-                    res.status(200).send(name + ' : Academy Registered!');
-                    console.log(name + ' : Academy Registered!');
-                }
-            })
+                    academy.save(async (err, saved) => {
+                        if (err) {
+                            res.status(500).send();
+                            console.log(name + ' : Error Registering!');
+                            return console.error(err);
+                        } else {
+                            let user;
+                            user = await User.findOneAndUpdate({email: manager}, {manages: saved._id, academy: saved._id});
+                            academy.competitors.push(user._id);
+                            academy.save();
+                            res.status(200).send(name + ' : Academy Registered!');
+                            console.log(name + ' : Academy Registered!');
+                        }
+                    })
                 }})
         }
     });
 });
 
-    app.get("/academiesGet", (req, res) =>{
-        Academy.find().then(found  => {
-                if(found){
-                    res.send(found);
-                }
+app.get("/academies", (req, res) =>{
+    Academy.find().then(found  => {
+            if(found){
+                res.send(found);
             }
+        }
 
 
-        )});
+    )});
 
-app.get("/academyGet/:id", (req, res) =>{
+app.get("/academy/:id", (req, res) =>{
     Academy.findOne({_id: req.params.id}, (err, found) =>{
         if(err){
             res.status(500).send();
@@ -336,7 +339,7 @@ app.post('/createAffiliation', Auth, (req, res) => {
         }
     });
 });
-app.get("/affiliationsGet", (req, res) =>{
+app.get("/affiliations", (req, res) =>{
     Affiliation.find().then(found  => {
             if(found){
                 res.send(found);
@@ -346,7 +349,7 @@ app.get("/affiliationsGet", (req, res) =>{
 
     )});
 
-app.get("/affiliationGet/:id", (req, res) =>{
+app.get("/affiliation/:id", (req, res) =>{
     Affiliation.findOne({_id: req.params.id}, (err, found) =>{
         if(err){
             res.status(500).send();
@@ -377,7 +380,7 @@ app.put("/affiliation/:id", Auth, (req, res) =>{
     })
 });
 
-app.get("/eventsGet", (req, res) =>{
+app.get("/events", (req, res) =>{
     Event.find().sort({ eventStart: 1 }).then(found  => {
             if(found){
                 res.send(found);
@@ -385,7 +388,7 @@ app.get("/eventsGet", (req, res) =>{
         }
     )});
 
-app.get("/eventGet/:id", (req, res) =>{
+app.get("/event/:id", (req, res) =>{
     Event.findOne({_id: req.params.id}).then(found  => {
             if(found){
                 res.send(found);
@@ -431,10 +434,10 @@ app.post('/createEvent', Auth, (req, res) => {
                     res.status(500).send('Error Registering!');
                     return console.error(err);
                 } else {
-                        console.log(email, saved._id);
-                        await User.updateOne({email: email}, {eventManage: saved._id});
-                        res.status(200).send('Event Registered!')
-                        console.log(name +' : Event Registered')
+                    console.log(email, saved._id);
+                    await User.updateOne({email: email}, {eventManage: saved._id});
+                    res.status(200).send('Event Registered!')
+                    console.log(name +' : Event Registered')
                 }
             })
         }
@@ -457,31 +460,31 @@ app.post('/createBracket', Auth, (req, res) => {
     const bracketName = req.body.bracketName.toLowerCase();
 
     Event.findOne({_id: event}, async (err, eventFound) => {
-            if (eventFound.email != user){
-                res.status(500).send();
-                console.log(user + ' : Incorrect : ')
-            }else{
+        if (eventFound.email != user){
+            res.status(500).send();
+            console.log(user + ' : Incorrect : ')
+        }else{
             console.log('User Authorized')
             const bracket = new Bracket({event, bracketName});
             Bracket.findOne({bracketName: bracketName}, async (err, found) => {
-                    console.log(found);
-                    if (found != null) {
-                        res.status(409).send();
-                        console.log(bracketName + ' : Bracket already exists')
-                    }
-                    else{
-                        bracket.save((err) => {
-                            if (err) {
-                                res.status(500).send('Error creating Bracket: ' + bracketName);
-                                return console.error(err);
-                            }
-                            else {
-                                res.status(200).send('Bracket Registered!')
-                                console.log(bracketName + ' : Event Registered')
-                            }
-                        })
-                    }
-                });
+                console.log(found);
+                if (found != null) {
+                    res.status(409).send();
+                    console.log(bracketName + ' : Bracket already exists')
+                }
+                else{
+                    bracket.save((err) => {
+                        if (err) {
+                            res.status(500).send('Error creating Bracket: ' + bracketName);
+                            return console.error(err);
+                        }
+                        else {
+                            res.status(200).send('Bracket Registered!')
+                            console.log(bracketName + ' : Event Registered')
+                        }
+                    })
+                }
+            });
         }});});
 
 app.put("/bracket/:id", Auth, (req, res) =>{
@@ -530,52 +533,52 @@ app.get("/matchesInBracket/:bracketID", (req, res) =>{
     )});
 
 app.post('/createMatch', Auth, (req, res) => {
-     let competitorOne;
+    let competitorOne;
     const bracketID = req.body.bracketID;
     const email = req.body.registrant;
     User.findOne({email: email}).then((found, err) =>{
-         if (found){
-             competitorOne = found.id;
-             console.log(competitorOne)
-             Match.findOne({competitorTwo: 'OPENSPACE', bracketID: bracketID}).then((found2) =>{
-                 if(found2 != null && found2.competitorOne != competitorOne){
+        if (found){
+            competitorOne = found.id;
+            console.log(competitorOne)
+            Match.findOne({competitorTwo: 'OPENSPACE', bracketID: bracketID}).then((found2) =>{
+                if(found2 != null && found2.competitorOne != competitorOne){
 
-                     found2.competitorTwo = competitorOne;
-                     found2.save((err) =>{
-                         if(err){
-                             console.log(err);
-                             res.status(500).send();
-                         }
-                         else{res.status(200).send();
-                             Bracket.updateOne({_id: bracketID }, { "$push": { competitors: competitorOne}}, (err, success) =>{
-                                 if(err){console.log(err)}
-                                 else{console.log(success)}
-                             });
-                         }
-                     })
-                 } else{
-                     Match.findOne({competitorOne: competitorOne, bracketID: bracketID}).then((found3) =>{
-                         if(found3 === null){
-                     const match = new Match({competitorOne, bracketID});
-                     match.save((err) => {
-                         if (err) {
-                             res.status(500).send('Error creating match: ' + bracketID);
-                             return console.error(err);
-                         }
-                         else {
-                             res.status(200).send('Match Registered!')
-                             console.log(bracketID + ' : Match Registered')}
-                             Bracket.updateOne({_id: bracketID}, { "$push": { competitors: competitorOne}}, (err, success) =>{
-                             if(err){console.log(err)}
-                             else{console.log(success)}
-                         });
-                     })
-                         }
-                         else{res.status(500).send()}
-                 })}
-             })
-         }else{console.log('end')}
-     }) ;
+                    found2.competitorTwo = competitorOne;
+                    found2.save((err) =>{
+                        if(err){
+                            console.log(err);
+                            res.status(500).send();
+                        }
+                        else{res.status(200).send();
+                            Bracket.updateOne({_id: bracketID }, { "$push": { competitors: competitorOne}}, (err, success) =>{
+                                if(err){console.log(err)}
+                                else{console.log(success)}
+                            });
+                        }
+                    })
+                } else{
+                    Match.findOne({competitorOne: competitorOne, bracketID: bracketID}).then((found3) =>{
+                        if(found3 === null){
+                            const match = new Match({competitorOne, bracketID});
+                            match.save((err) => {
+                                if (err) {
+                                    res.status(500).send('Error creating match: ' + bracketID);
+                                    return console.error(err);
+                                }
+                                else {
+                                    res.status(200).send('Match Registered!')
+                                    console.log(bracketID + ' : Match Registered')}
+                                Bracket.updateOne({_id: bracketID}, { "$push": { competitors: competitorOne}}, (err, success) =>{
+                                    if(err){console.log(err)}
+                                    else{console.log(success)}
+                                });
+                            })
+                        }
+                        else{res.status(500).send()}
+                    })}
+            })
+        }else{console.log('end')}
+    }) ;
 
 
 
@@ -599,3 +602,7 @@ app.put("/match/:id", (req, res) =>{
             }
         }
     )});
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+});

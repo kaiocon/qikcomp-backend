@@ -5,7 +5,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of edce868... React
 =======
 >>>>>>> parent of edce868... React
       <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
@@ -137,7 +140,11 @@
       <workItem from="1585320428802" duration="672000" />
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       <workItem from="1585321137197" duration="8832000" />
+=======
+      <workItem from="1585321137197" duration="3419000" />
+>>>>>>> parent of edce868... React
 =======
       <workItem from="1585321137197" duration="3419000" />
 >>>>>>> parent of edce868... React
@@ -169,6 +176,7 @@
     <state x="740" y="274" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1584569234095" />
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     <state width="1389" height="278" key="GridCell.Tab.0.bottom" timestamp="1585355851600">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -185,6 +193,24 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1389" height="278" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1585355851600" />
+=======
+    <state width="1396" height="278" key="GridCell.Tab.0.bottom" timestamp="1585268837552">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1396" height="278" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1585268837552" />
+    <state width="1396" height="278" key="GridCell.Tab.0.center" timestamp="1585268837552">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1396" height="278" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1585268837552" />
+    <state width="1396" height="278" key="GridCell.Tab.0.left" timestamp="1585268837551">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1396" height="278" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1585268837551" />
+    <state width="1396" height="278" key="GridCell.Tab.0.right" timestamp="1585268837552">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1396" height="278" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1585268837552" />
+>>>>>>> parent of edce868... React
 =======
     <state width="1396" height="278" key="GridCell.Tab.0.bottom" timestamp="1585268837552">
       <screen x="0" y="0" width="1920" height="1040" />
